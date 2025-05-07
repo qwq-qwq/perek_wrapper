@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Настройки</title>
+    <style>
+      body { font-family: sans-serif; padding: 1rem; }
+      label { display: block; margin: 0.5rem 0; }
+    </style>
+  </head>
+  <body>
+    <h1>Настройки</h1>
+    <form id="form">
+      <label>Proxy URL:
+        <input type="text" id="proxy" placeholder="http://..." />
+      </label>
+      <label>Тема:
+        <select id="theme">
+          <option value="light">Светлая</option>
+          <option value="dark">Тёмная</option>
+        </select>
+      </label>
+      <label>
+        <input type="checkbox" id="autolaunch" />
+        Автозапуск при старте OS
+      </label>
+      <button type="submit">Сохранить</button>
+    </form>
+    <script type="module">
+      import { invoke } from '@tauri-apps/api/tauri';
+      async function load() {
+        const cfg = await invoke('load_settings');
+        document.getElementById('proxy').value = cfg.proxy || '';
+        document.getElementById('theme').value = cfg.theme || 'light';
+        document.getElementById('autolaunch').checked = cfg.autolaunch || false;
+      }
+      document.getElementById('form').addEventListener('submit', async e => {
+        e.preventDefault();
+        await invoke('save_settings', {
+          settings: {
+            proxy: document.getElementById('proxy').value,
+            theme: document.getElementById('theme').value,
+            autolaunch: document.getElementById('autolaunch').checked
+          }
+        });
+        window.close();
+      });
+      load();
+    </script>
+  </body>
+</html>
